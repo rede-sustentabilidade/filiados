@@ -13,27 +13,41 @@ function saveJwtToken(jwt_token) {
   return { type: types.SAVE_JWT_TOKEN, jwt_token: jwt_token };
 }
 
-function loggedInSuccessfull(jwt_token) {
-  return { type: types.LOGGED_IN_SUCCESSFULL, jwt_token: jwt_token, isValid: true };
+function loggedInSuccessfull(jwt_token, user) {
+  return { type: types.LOGGED_IN_SUCCESSFULL, jwt_token, user: user, isValid: true };
+}
+
+function logoutSuccessfull() {
+  return { type: types.LOGOUT_SUCCESSFULL, jwt_token: null, isValid: false };
+}
+
+export function logoutUser() {
+	return dispatch => {
+		localStorage.clear();
+		dispatch(logoutSuccessfull());
+	};
 }
 
 export function loginUser(jwt_token) {
 	return dispatch => {
-		dispatch(loggedInSuccessfull(jwt_token));
-	}
+		let user = {name: 'lucaspirola@gmail.com', id: 1};
+		dispatch(saveJwtToken(jwt_token));
+		dispatch(loggedInSuccessfull(jwt_token, user));
+		// redirect user loggedin to list filiados
+	};
 }
 
 export function fetchAccessToken(code){
 	let config = {
 		method: 'POST',
 		headers: { 'Content-Type':'application/x-www-form-urlencoded' },
-		body: `code=${code}&client_secret=JHtpXlo7iRrJfm2dR32n&grant_type=authorization_code&client_id=6enqtMzu&redirect_uri=http://localhost:3000/login`
+		body: `code=${code}&client_secret=JHtpXlo7iRrJfm2dR32n&grant_type=authorization_code&client_id=6enqtMzu&redirect_uri=http://localhost:3000/`
 	};
 
 	return dispatch => {
 		// We dispatch requestLogin to kickoff the call to the API
 		if (!code) {
-			window.location = 'http://localhost:3003/authorization?client_id=6enqtMzu&client_secret=JHtpXlo7iRrJfm2dR32n&response_type=code&redirect_uri=http://localhost:3000/login';
+			window.location = 'http://localhost:3003/authorization?client_id=6enqtMzu&client_secret=JHtpXlo7iRrJfm2dR32n&response_type=code&redirect_uri=http://localhost:3000/';
 		}
 		dispatch(requestCode(code));
 		return fetch('http://localhost:3003/oauth/token', config)
@@ -66,7 +80,7 @@ export function fetchJwtToken(access_token) {
 
 	return dispatch => {
 		// We dispatch requestLogin to kickoff the call to the API
-		dispatch(saveAccessToken(access_token))
+		dispatch(saveAccessToken(access_token));
 		return fetch('http://localhost:3003/jwt', config)
 			.then(response =>
 				response.json()
@@ -82,7 +96,6 @@ export function fetchJwtToken(access_token) {
 					localStorage.setItem('jwt_token', jwt.token);
 
 					// Dispatch the success action
-					dispatch(saveJwtToken({jwt_token:jwt.token}));
 					dispatch(loginUser(jwt.token));
 				}
 			}).catch(err => console.log("Error: ", err));

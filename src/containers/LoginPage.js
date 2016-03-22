@@ -25,6 +25,7 @@ class LoginPage extends Component {
   render() {
     return (
       <LoginCheck
+        authActions={this.props.actions}
         authState={this.props.authState}
       />
     );

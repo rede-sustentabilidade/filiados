@@ -1,7 +1,8 @@
 export const SAVE_FUEL_SAVINGS      = 'SAVE_FUEL_SAVINGS';
 export const CALCULATE_FUEL_SAVINGS = 'CALCULATE_FUEL_SAVINGS';
 
-export const REQUEST_CODE         = 'REQUEST_CODE';
-export const SAVE_ACCESS_TOKEN    = 'SAVE_ACCESS_TOKEN';
-export const SAVE_JWT_TOKEN       = 'SAVE_JWT_TOKEN';
+export const REQUEST_CODE          = 'REQUEST_CODE';
+export const SAVE_ACCESS_TOKEN     = 'SAVE_ACCESS_TOKEN';
+export const SAVE_JWT_TOKEN        = 'SAVE_JWT_TOKEN';
 export const LOGGED_IN_SUCCESSFULL = 'LOGGED_IN_SUCCESSFULL';
+export const LOGOUT_SUCCESSFULL    = 'LOGOUT_SUCCESSFULL';

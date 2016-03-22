@@ -1,11 +1,12 @@
-import {REQUEST_CODE, SAVE_ACCESS_TOKEN, SAVE_JWT_TOKEN, LOGGED_IN_SUCCESSFULL} from '../constants/ActionTypes';
+import {REQUEST_CODE, SAVE_ACCESS_TOKEN, SAVE_JWT_TOKEN, LOGGED_IN_SUCCESSFULL, LOGOUT_SUCCESSFULL} from '../constants/ActionTypes';
 import objectAssign from 'object-assign';
 
 const initialState = {
   isValid: false,
   code: null,
   access_token: null,
-  jwt_token: null
+  jwt_token: null,
+  user: {}
 };
 
 //IMPORTANT: Note that with Redux, state should NEVER be changed.
@@ -32,7 +33,11 @@ export default function authAppState(state = initialState, action) {
     }
     case LOGGED_IN_SUCCESSFULL:
     {
-      return objectAssign({}, state, { jwt_token: action.jwt_token, isValid: true });
+      return objectAssign({}, state, { jwt_token: action.jwt_token, user: action.user, isValid: true });
+    }
+    case LOGOUT_SUCCESSFULL:
+    {
+      return objectAssign({}, state, { jwt_token: null, isValid: false });
     }
 		default:
 			return state;

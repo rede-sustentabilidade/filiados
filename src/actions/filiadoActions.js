@@ -1,4 +1,5 @@
 import * as types from '../constants/ActionTypes';
+import fetch from 'isomorphic-fetch';
 
 export function saveFuelSavings(settings) {
 	return { type: types.SAVE_FUEL_SAVINGS, settings };
