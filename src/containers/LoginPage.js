@@ -11,9 +11,15 @@ class LoginPage extends Component {
     location: PropTypes.object.isRequired
   };
 
-  componentWillMount () {
-    let { query } = this.props.location;
-    this.props.actions.requestCode(query.code);
+  componentDidMount () {
+    let jwt_token = localStorage.getItem('jwt_token') || null;
+
+    if (!jwt_token) {
+      let { query } = this.props.location;
+      this.props.actions.fetchAccessToken(query.code);
+    } else {
+      this.props.actions.loginUser(jwt_token);
+    }
   }
 
   render() {
