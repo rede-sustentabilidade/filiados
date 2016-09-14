@@ -6,6 +6,7 @@ import { combineReducers } from 'redux'
 import paginate from './paginate'
 import { reducer as form } from 'redux-form'
 import { reducers as dashboard } from '../modules/Dashboard'
+import { reducers as auth } from '../modules/Auth'
 
 
 // Updates an entity cache in response to any action with response.entities.
@@ -56,7 +57,8 @@ const rootReducer = combineReducers({
   errorMessage,
   routing,
   dashboard,
-  form
+  form,
+  auth
 })
 
 export default rootReducer

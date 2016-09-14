@@ -1,17 +1,22 @@
 import React, { Component, PropTypes } from 'react'
+import { connect } from 'react-redux'
 import { Field, reduxForm } from 'redux-form'
 
 import '../styles/LoginPage.css'
 
 import { Form, InputField } from '../../Dashboard/components'
 import { isValidEmail } from '../../Dashboard/validators'
-import { loginSubmit } from '../actions'
+import { loginSubmit, loadAccessToken } from '../actions'
 
 
 class LoginPage extends Component {
 
-  render() {
+  componentDidMount() {
+    const { location: { query }, loadAccessToken } = this.props
+    loadAccessToken(query.code)
+  }
 
+  render() {
     const { handleSubmit, submitting, error } = this.props
 
     return (
@@ -48,4 +53,12 @@ const validate = values => {
   return errors
 }
 
-export default reduxForm({ form: 'loginForm', validate })(LoginPage)
+LoginPage = reduxForm({ form: 'loginForm', validate })(LoginPage)
+
+const mapStateToProps = (state, ownProps) => ({
+  auth: state.auth
+})
+
+const mapActionsToProps = { loadAccessToken }
+
+export default connect(mapStateToProps, mapActionsToProps)(LoginPage)
