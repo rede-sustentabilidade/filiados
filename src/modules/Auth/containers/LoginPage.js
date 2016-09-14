@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react'
 import { Field, reduxForm } from 'redux-form'
 
+import '../styles/LoginPage.css'
+
 import { Form, InputField } from '../../Dashboard/components'
 import { isValidEmail } from '../../Dashboard/validators'
 import { loginSubmit } from '../actions'
@@ -10,15 +12,17 @@ class LoginPage extends Component {
 
   render() {
 
-    const { handleSubmit, ...reduxFormProps } = this.props
+    const { handleSubmit, submitting, error } = this.props
 
     return (
-      <div className="login-page">
-        <h2>This is login page</h2>
-        <Form submitLabel="Enter" handleSubmit={handleSubmit(loginSubmit)} {...reduxFormProps}>
-          <Field name="email" type="email" component={InputField} label="E-mail" />
-          <Field name="password" type="password" component={InputField} label="Password" />
-        </Form>
+      <div className="LoginPage">
+        <div className="LoginForm">
+          <h2>This is login page</h2>
+          <Form submitLabel="Enter" handleSubmit={handleSubmit(loginSubmit)} submitting={submitting} error={error}>
+            <Field name="email" type="email" component={InputField} label="E-mail" />
+            <Field name="password" type="password" component={InputField} label="Password" />
+          </Form>
+        </div>
       </div>
     )
   }

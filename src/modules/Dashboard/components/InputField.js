@@ -1,14 +1,27 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
+
+import { TextField } from 'material-ui'
 
 
 const InputField = ({ input, label, type, meta: { touched, error } }) => (
-  <div>
-    {label && <label htmlFor={input.name}>{label}</label>}
-    <div>
-      <input {...input} type={type} />
-      {touched && error && <span>{error}</span>}
-    </div>
-  </div>
+  <TextField
+    fullWidth={true}
+    type={type}
+    hintText={label}
+    errorText={touched && error ? error : null}
+    {...input}
+  />
 )
+
+InputField.propTypes = {
+  // Injected by redux-form Field
+  label: PropTypes.string,
+  input: PropTypes.object.isRequired,
+  type: PropTypes.string.isRequired,
+  meta: PropTypes.shape({
+    touched: PropTypes.bool,
+    error: PropTypes.string,
+  })
+}
 
 export default InputField

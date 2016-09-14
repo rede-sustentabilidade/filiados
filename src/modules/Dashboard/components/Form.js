@@ -1,5 +1,8 @@
 import React, { PropTypes } from 'react'
 
+import '../styles/Form.css'
+import { RaisedButton } from 'material-ui'
+
 
 const Form = (props) => {
 
@@ -17,10 +20,10 @@ const Form = (props) => {
   return (
     <form onSubmit={handleSubmit} {...otherProps}>
       {children}
-      {error && <strong>{error}</strong>}
       <div>
-        <button type="submit" disabled={submitting}>{submitLabel}</button>
-        {cancelLabel && reset && <button type="button" disabled={submitting} onClick={reset}>{cancelLabel}</button>}
+        {cancelLabel && reset && <RaisedButton className="Button" label={cancelLabel} disabled={submitting} onClick={reset} />}
+        <RaisedButton className="Button" primary={true} label={submitLabel} type="submit" disabled={submitting} />
+        {error && <strong>{error}</strong>}
       </div>
     </form>
   )
