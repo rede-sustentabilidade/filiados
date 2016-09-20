@@ -40,9 +40,15 @@ export function loginUser(jwt_token) {
 export function fetchAccessToken(code){
 	let config = {
 		method: 'POST',
-		headers: { 'Content-Type':'application/x-www-form-urlencoded' },
-		body: `code=${code}&client_secret=JHtpXlo7iRrJfm2dR32n&grant_type=authorization_code&client_id=6enqtMzu&redirect_uri=http://localhost:3000/`
-	};
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+	    code: code,
+	    client_id: '6enqtMzu',
+	    client_secret: 'JHtpXlo7iRrJfm2dR32n',
+	    grant_type: 'authorization_code',
+	    redirect_uri: 'http://localhost:3000/'
+	  })
+	}
 
 	return dispatch => {
 		// We dispatch requestLogin to kickoff the call to the API

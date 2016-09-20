@@ -1,33 +1,39 @@
 import * as ActionTypes from './actions'
-import merge from 'lodash/merge'
 
 const initialState = {
   loading: false,
-  isValid: false,
-  response: null,
   error: null,
-  code: null,
-  access_token: null,
-  jwt_token: null,
-  user: {}
+  isAuthenticated: false,
+  credentials: null,
+  user: null
 }
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case ActionTypes.REQUEST_ACCESS_TOKEN:
-      return merge({}, state, {
+    case ActionTypes.REQUEST_ACCESS_TOKEN, ActionTypes.REQUEST_USER_INFO:
+      return {
+        ...state,
         loading: true,
-      })
+      }
     case ActionTypes.SUCCESS_ACCESS_TOKEN:
-      return merge({}, state, {
-        response: action.response,
-        loading: false
-      })
-    case ActionTypes.FAILURE_ACCESS_TOKEN:
-      return merge({}, state, {
+      return {
+        ...state,
+        loading: false,
+        credentials: action.response,
+      }
+    case ActionTypes.SUCCESS_USER_INFO:
+      return {
+        ...state,
+        loading: false,
+        user: action.response,
+        isAuthenticated: true
+      }
+    case ActionTypes.FAILURE_ACCESS_TOKEN, ActionTypes.FAILURE_USER_INFO:
+      return {
+        ...state,
         loading: false,
         error: action.error
-      })
+      }
     default:
       return state
   }
