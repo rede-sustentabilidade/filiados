@@ -1,33 +1,26 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Link } from 'react'
 
 import '../styles/LoginPage.css'
 
-import { loadAccessToken } from '../actions'
+import { UserInfo, Loading } from '../components'
+import { login } from '../actions'
 
 
 class LoginPage extends Component {
 
   componentDidMount() {
-    const { location: { query }, loadAccessToken } = this.props
-    loadAccessToken(query.code)
+    const { location: { query }, login } = this.props
+    login(query.code)
   }
 
   render() {
-    const { loading, user, credentials } = this.props
-
-    const { token_type, access_token } = credentials || {}
+    const { isLoading, user, error } = this.props
 
     return (
       <div className="LoginPage">
-        {loading ? (<span>Loading . . .</span>) : (
-          <div className="TokenInfo">
-            <label>Access Token</label>
-            <p>{`${token_type} ${access_token}`}</p>
-          </div>
-        )}
-        {credentials && <Link to="/">Go to dashboard</Link>}
+        {isLoading ? <Loading /> : <UserInfo user={user} />}
+        <span>{error}</span>
       </div>
     )
   }
@@ -35,20 +28,19 @@ class LoginPage extends Component {
 
 PropTypes.propTypes = {
   // Injected by react-redux
-  loading: PropTypes.bool.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  isAuthenticated: PropTypes.bool.isRequired,
   error: PropTypes.string,
-  credentials: PropTypes.object,
-  loadAccessToken: PropTypes.func.isRequired,
+  login: PropTypes.func.isRequired,
   user: PropTypes.object
 }
 
 const mapStateToProps = (state, ownProps) => ({
   error: state.auth.error,
-  loading: state.auth.loading,
-  credentials: state.auth.credentials,
+  isLoading: state.auth.isLoading,
   user: state.auth.user
 })
 
-const mapActionsToProps = { loadAccessToken }
+const mapActionsToProps = { login }
 
 export default connect(mapStateToProps, mapActionsToProps)(LoginPage)

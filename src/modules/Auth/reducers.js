@@ -1,37 +1,39 @@
 import * as ActionTypes from './actions'
 
 const initialState = {
-  loading: false,
+  isLoading: false,
   error: null,
   isAuthenticated: false,
+  code: null,
   credentials: null,
   user: null
 }
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case ActionTypes.REQUEST_ACCESS_TOKEN, ActionTypes.REQUEST_USER_INFO:
+    case ActionTypes.REQUEST_ACCESS_TOKEN:
       return {
         ...state,
-        loading: true,
+        isLoading: true,
+        code: action.code
       }
     case ActionTypes.SUCCESS_ACCESS_TOKEN:
       return {
         ...state,
-        loading: false,
-        credentials: action.response,
+        credentials: action.credentials,
       }
     case ActionTypes.SUCCESS_USER_INFO:
       return {
         ...state,
-        loading: false,
-        user: action.response,
+        isLoading: false,
+        user: action.user,
         isAuthenticated: true
       }
-    case ActionTypes.FAILURE_ACCESS_TOKEN, ActionTypes.FAILURE_USER_INFO:
+    case ActionTypes.FAILURE_ACCESS_TOKEN:
+    case ActionTypes.FAILURE_USER_INFO:
       return {
         ...state,
-        loading: false,
+        isLoading: false,
         error: action.error
       }
     default:

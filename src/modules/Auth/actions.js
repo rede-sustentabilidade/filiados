@@ -1,69 +1,120 @@
-import { CALL_API } from '../../middleware/api'
+import fetch from 'isomorphic-fetch'
 
+const OAUTH_URL = 'https://passaporte.redesustentabilidade.org.br'
+const REDIRECT_URI = 'http://localhost:3000/login'
+const CLIENT_ID = '6enqtMzu'
+const CLIENT_SECRET = 'JHtpXlo7iRrJfm2dR32n'
 
 export const REQUEST_ACCESS_TOKEN = 'Auth/REQUEST_ACCESS_TOKEN'
 export const SUCCESS_ACCESS_TOKEN = 'Auth/SUCCESS_ACCESS_TOKEN'
 export const FAILURE_ACCESS_TOKEN = 'Auth/FAILURE_ACCESS_TOKEN'
 
-const fetchAccessToken = code => {
-  if (!code) {
-    // Change urls to variables environment
-    window.location = 'https://passaporte.redesustentabilidade.org.br/dialog/authorize?response_type=code&scope=profile&approval_prompt=auto&client_id=6enqtMzu&redirect_uri=http://localhost:3000/login'
-  }
-
-  return {
-    [CALL_API]: {
-      types: [REQUEST_ACCESS_TOKEN, SUCCESS_ACCESS_TOKEN, FAILURE_ACCESS_TOKEN],
-      endpoint: 'https://passaporte.redesustentabilidade.org.br/oauth/token',
-      config: {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        },
-        body: `code=${code}&client_secret=JHtpXlo7iRrJfm2dR32n&grant_type=authorization_code&client_id=6enqtMzu&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Flogin`
-      }
-    }
-  }
-}
-
 export const REQUEST_USER_INFO = 'Auth/REQUEST_USER_INFO'
 export const SUCCESS_USER_INFO = 'Auth/SUCCESS_USER_INFO'
 export const FAILURE_USER_INFO = 'Auth/FAILURE_USER_INFO'
 
-const fecthUserInfo = ({ token_type, access_token }) => {
-  return {
-    [CALL_API]: {
-      types: [REQUEST_USER_INFO, SUCCESS_USER_INFO, FAILURE_USER_INFO],
-      endpoint: 'https://passaporte.redesustentabilidade.org.br/api/userinfo',
-      config: {
-        method: 'GET',
-        headers: {
-          'Authorization': `${token_type} ${access_token}`
+const failureAccessToken = error => ({
+  type: FAILURE_ACCESS_TOKEN,
+  error
+})
+
+const requestAccessToken = code => ({
+  type: REQUEST_ACCESS_TOKEN,
+  code
+})
+
+const successAccessToken = json => ({
+  type: SUCCESS_ACCESS_TOKEN,
+  credentials: json,
+})
+
+const requestUserInfo = token => ({
+  type: REQUEST_USER_INFO,
+  token
+})
+
+const failureUserInfo = error => ({
+  type: FAILURE_USER_INFO,
+  error
+})
+
+const loggedInSuccesfull = json => ({
+  type: SUCCESS_USER_INFO,
+  user: json,
+})
+
+const fetchUserInfo = (credentials) => {
+  return dispatch => {
+
+    const token = `${credentials.token_type} ${credentials.access_token}`
+    dispatch(requestUserInfo(token))
+
+    const headers = new Headers({
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': token,
+    })
+
+    const config = {
+      method: 'GET',
+      headers: headers,
+      credentials: 'include',
+    }
+
+    fetch(`${OAUTH_URL}/api/userinfo`, config)
+      .then(response =>
+        response.json().then(json => ({ json, response }))
+      ).then(({ json, response }) => {
+        if (!response.ok) {
+          return Promise.reject(json)
         }
-      }
-    }
+
+        // Save user in state
+        dispatch(loggedInSuccesfull(json))
+
+      }).catch(err => dispatch(failureUserInfo(err)))
   }
 }
 
-export const loadAccessToken = code => {
-  return (dispatch, getState) => {
-    const credentials = getState().auth.credentials
-    if (credentials !== null) {
-      // Token saved in state
-      return
+const fetchAccessToken = code => {
+  if (!code) {
+    // Change urls to variables environment
+    window.location = `${OAUTH_URL}/dialog/authorize?response_type=code&scope=profile&approval_prompt=auto&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`
+  }
+
+  return dispatch => {
+    dispatch(requestAccessToken(code))
+
+    const data = `code=${code}&client_secret=JHtpXlo7iRrJfm2dR32n&grant_type=authorization_code&client_id=6enqtMzu&redirect_uri=http://localhost:3000/login`
+    const config = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      },
+      body: data
     }
 
-    // Fetch token, call if not is save storage or app state
-    return dispatch(fetchAccessToken(code))
+    fetch(`${OAUTH_URL}/oauth/token`, config)
+      .then(response =>
+        response.json().then(json => ({ json, response }))
+      ).then(({ json, response }) => {
+        if (!response.ok) {
+          if (response.status === 403) {
+            dispatch(failureAccessToken(json.error_description))
+          }
+          return Promise.reject(json)
+        }
+
+        // Save token in state and load user info
+        dispatch(successAccessToken(json))
+        dispatch(fetchUserInfo(json))
+
+      }).catch(err => console.log("Error: ", err))
   }
 }
 
-export const loadUserInfo = credentials => {
-  const user = getState().auth.user
-  if (user !== null) {
-    return
+export const login = code => {
+  return dispatch => {
+    dispatch(fetchAccessToken(code))
   }
-
-  // Fetch user info based on token saved
-  return dispatch(fecthUserInfo(credentials))
 }
