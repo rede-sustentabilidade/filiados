@@ -3,9 +3,9 @@ import * as ActionTypes from './actions'
 const initialState = {
   isLoading: false,
   error: null,
-  isAuthenticated: false,
+  isLoggedIn: false,
   code: null,
-  credentials: null,
+  jwtToken: null,
   user: null
 }
 
@@ -17,17 +17,29 @@ const reducer = (state = initialState, action) => {
         isLoading: true,
         code: action.code
       }
+    case ActionTypes.REQUEST_USER_INFO:
+      return {
+        ...state,
+        isLoading: true
+      }
     case ActionTypes.SUCCESS_ACCESS_TOKEN:
       return {
         ...state,
-        credentials: action.credentials,
+        jwtToken: action.jwtToken,
       }
     case ActionTypes.SUCCESS_USER_INFO:
       return {
         ...state,
         isLoading: false,
         user: action.user,
-        isAuthenticated: true
+        isLoggedIn: true
+      }
+    case ActionTypes.SUCCESS_LOGOUT:
+      return {
+        ...state,
+        user: null,
+        jwtToken: null,
+        isLoggedIn: false
       }
     case ActionTypes.FAILURE_ACCESS_TOKEN:
     case ActionTypes.FAILURE_USER_INFO:

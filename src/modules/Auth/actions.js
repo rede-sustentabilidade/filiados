@@ -1,7 +1,7 @@
 import fetch from 'isomorphic-fetch'
 
 const OAUTH_URL = 'https://passaporte.redesustentabilidade.org.br'
-const REDIRECT_URI = 'http://localhost:3000/login'
+const REDIRECT_URI = 'http://filiados.redesustentabilidade.org.br/login'
 const CLIENT_ID = '6enqtMzu'
 const CLIENT_SECRET = 'JHtpXlo7iRrJfm2dR32n'
 
@@ -23,14 +23,18 @@ const requestAccessToken = code => ({
   code
 })
 
-const successAccessToken = json => ({
-  type: SUCCESS_ACCESS_TOKEN,
-  credentials: json,
-})
+const successAccessToken = jwtToken => {
+  return dispatch => {
+    // If login was successful, set the token in local storage
+    localStorage.setItem('jwt_token', jwtToken)
 
-const requestUserInfo = token => ({
+    dispatch({ type: SUCCESS_ACCESS_TOKEN, jwtToken: jwtToken })
+  }
+}
+
+const requestUserInfo = jwtToken => ({
   type: REQUEST_USER_INFO,
-  token
+  jwtToken
 })
 
 const failureUserInfo = error => ({
@@ -43,22 +47,18 @@ const loggedInSuccesfull = json => ({
   user: json,
 })
 
-const fetchUserInfo = (credentials) => {
+const fetchUserInfo = (jwtToken) => {
   return dispatch => {
 
-    const token = `${credentials.token_type} ${credentials.access_token}`
-    dispatch(requestUserInfo(token))
-
-    const headers = new Headers({
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'Authorization': token,
-    })
+    dispatch(requestUserInfo(jwtToken))
 
     const config = {
       method: 'GET',
-      headers: headers,
-      credentials: 'include',
+      mode: 'cors',
+      credentials: "include",
+      headers: {
+        'Authorization': jwtToken
+      },
     }
 
     fetch(`${OAUTH_URL}/api/userinfo`, config)
@@ -85,7 +85,7 @@ const fetchAccessToken = code => {
   return dispatch => {
     dispatch(requestAccessToken(code))
 
-    const data = `code=${code}&client_secret=JHtpXlo7iRrJfm2dR32n&grant_type=authorization_code&client_id=6enqtMzu&redirect_uri=http://localhost:3000/login`
+    const data = `code=${code}&client_secret=${CLIENT_SECRET}&grant_type=authorization_code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`
     const config = {
       method: 'POST',
       headers: {
@@ -105,16 +105,44 @@ const fetchAccessToken = code => {
           return Promise.reject(json)
         }
 
+        const jwtToken = `${json.token_type} ${json.access_token}`
+
         // Save token in state and load user info
-        dispatch(successAccessToken(json))
-        dispatch(fetchUserInfo(json))
+        dispatch(successAccessToken(jwtToken))
+        dispatch(fetchUserInfo(jwtToken))
 
       }).catch(err => console.log("Error: ", err))
   }
 }
 
 export const login = code => {
-  return dispatch => {
-    dispatch(fetchAccessToken(code))
+  return (dispatch, getState) => {
+    const jwtToken = getState().auth.jwtToken || localStorage.getItem('jwt_token')
+
+    if (jwtToken) {
+      // Saved token to storage and state
+      dispatch(successAccessToken(jwtToken))
+      // Load user information
+      dispatch(fetchUserInfo(jwtToken))
+    } else {
+      // Get access token
+      dispatch(fetchAccessToken(code))
+    }
+  }
+}
+
+export const SUCCESS_LOGOUT = 'Auth/SUCCESS_LOGOUT'
+
+
+const successLogout = () => ({
+  type: SUCCESS_LOGOUT
+})
+
+
+export const logout = () => {
+  return (dispatch, getState) => {
+    // Clear localStorage to remove jwt_token
+    localStorage.clear()
+    dispatch(successLogout())
   }
 }

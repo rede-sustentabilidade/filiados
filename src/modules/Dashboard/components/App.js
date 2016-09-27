@@ -1,33 +1,37 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import { Link } from 'react-router'
 
-import { loadUserInfo } from '../actions'
+import { logout } from '../../Auth/actions'
 
 
 class App extends Component {
 
-  componentDidUpdate() {
-    const { credentials, loadUserInfo } = this.props
-    loadUserInfo(credentials)
-  }
-
   render() {
-    const { user } = this.props
+    const { isLoggedIn, user, logout } = this.props
+
     return (
-      <p>User email: {user.email}</p>
+      <div>
+        {isLoggedIn ? (
+          <div>
+            <p>Logged user with:</p>
+            <code>{JSON.stringify(user)}</code>
+            <hr />
+            <button type="button" onClick={() => logout()}>Logout</button>
+          </div>
+        ) : <p>You isn't logged, <Link to="/login">go to login page</Link></p>}
+      </div>
     )
   }
-
 }
 
-const mapStateToProps = (getState) => {
+const mapStateToProps = state => {
   return {
-    loading: getState().auth.loading,
-    user: getState().auth.user,
-    credentials: getState().auth.credentials
+    user: state.auth.user,
+    isLoggedIn: state.auth.isLoggedIn
   }
 }
 
-const mapActionToProps = { loadUserInfo }
+const mapStateToActions = { logout }
 
-export default connect(mapStateToProps, mapActionToProps)(App)
+export default connect(mapStateToProps, mapStateToActions)(App)

@@ -1,9 +1,10 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
+import { Link } from 'react-router'
 
 import '../styles/LoginPage.css'
 
-import { UserInfo, Loading } from '../components'
+import { Loading } from '../components'
 import { login } from '../actions'
 
 
@@ -15,12 +16,14 @@ class LoginPage extends Component {
   }
 
   render() {
-    const { isLoading, user, error } = this.props
+    const { isLoading, error } = this.props
 
     return (
       <div className="LoginPage">
-        {isLoading ? <Loading /> : <UserInfo user={user} />}
-        <span>{error}</span>
+        {isLoading ? <Loading /> : (
+          <p>Logged successfull <Link to="/">go to dashboard</Link></p>
+        )}
+        {error && <span>{error}</span>}
       </div>
     )
   }
@@ -29,16 +32,13 @@ class LoginPage extends Component {
 PropTypes.propTypes = {
   // Injected by react-redux
   isLoading: PropTypes.bool.isRequired,
-  isAuthenticated: PropTypes.bool.isRequired,
   error: PropTypes.string,
-  login: PropTypes.func.isRequired,
-  user: PropTypes.object
+  login: PropTypes.func.isRequired
 }
 
 const mapStateToProps = (state, ownProps) => ({
   error: state.auth.error,
-  isLoading: state.auth.isLoading,
-  user: state.auth.user
+  isLoading: state.auth.isLoading
 })
 
 const mapActionsToProps = { login }
