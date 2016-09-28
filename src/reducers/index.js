@@ -1,10 +1,12 @@
-import { combineReducers } from 'redux';
-import fuelSavingsAppState from './fuelSavings';
-import authAppState from './auth';
+import { routerReducer as routing } from 'react-router-redux'
+import { combineReducers } from 'redux'
+
+import auth from '../modules/Auth/reducers'
+
 
 const rootReducer = combineReducers({
-  fuelSavingsAppState,
-  authAppState
-});
+  routing,
+  auth
+})
 
-export default rootReducer;
+export default rootReducer

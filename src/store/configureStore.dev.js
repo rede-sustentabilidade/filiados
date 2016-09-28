@@ -1,28 +1,27 @@
-//This file merely configures the store for hot reloading.
-//This boilerplate file is likely to be the same for each project that uses Redux.
-//With Redux, the actual stores are in /reducers.
+import { createStore, applyMiddleware, compose } from 'redux'
+import thunk from 'redux-thunk'
+import createLogger from 'redux-logger'
+import api from '../middleware/api'
+import rootReducer from '../reducers'
+import DevTools from '../containers/DevTools'
 
-import { createStore, applyMiddleware, compose } from 'redux';
-import thunkMiddleware from 'redux-thunk';
-import createLogger from 'redux-logger';
-import rootReducer from '../reducers';
-
-const loggerMiddleware = createLogger();
-
-export default function configureStore(initialState) {
-
-  const store = createStore(rootReducer, initialState, compose(
-      applyMiddleware(thunkMiddleware, loggerMiddleware),
-      window.devToolsExtension ? window.devToolsExtension() : f => f
-    ));
+export default function configureStore(preloadedState) {
+  const store = createStore(
+    rootReducer,
+    preloadedState,
+    compose(
+      applyMiddleware(thunk, api, createLogger()),
+      DevTools.instrument()
+    )
+  )
 
   if (module.hot) {
     // Enable Webpack hot module replacement for reducers
     module.hot.accept('../reducers', () => {
-      const nextReducer = require('../reducers').default;
-      store.replaceReducer(nextReducer);
-    });
+      const nextRootReducer = require('../reducers').default
+      store.replaceReducer(nextRootReducer)
+    })
   }
 
-  return store;
+  return store
 }

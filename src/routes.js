@@ -1,15 +1,14 @@
-import React from 'react';
-import { Route, IndexRoute } from 'react-router';
+import React from 'react'
+import { IndexRoute, Route } from 'react-router'
 
-import App from './components/App';
-import LoginPage from './containers/LoginPage.js';
-import ListPage from './containers/ListPage.js';
-import NotFoundPage from './components/NotFoundPage.js';
+import App from './containers/App'
+import { LoginPage } from './modules/Auth/containers'
+import { App as DashboardApp } from './modules/Dashboard/components'
+
 
 export default (
   <Route path="/" component={App}>
-    <IndexRoute component={LoginPage} />
-    <Route path="list" component={ListPage}/>
-    <Route path="*" component={NotFoundPage} />
+    <IndexRoute component={DashboardApp} />
+    <Route path="login" component={LoginPage} />
   </Route>
-);
+)
